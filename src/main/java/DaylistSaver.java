@@ -17,20 +17,19 @@ public class DaylistSaver
 
     public static void main(String[] args)
     {
-        try
+        try(FileInputStream propFile = new FileInputStream("config.properties"))
         {
             Properties prop = new Properties();
-            FileInputStream propFile = new FileInputStream("config.properties");
             prop.load(propFile);
 
             String spClientId = prop.getProperty("spotify_client_id");
             String spClientSecret = prop.getProperty("spotify_client_secret");
-
+            String redirectUrl = prop.getProperty("redirect_url");
 
             spotifyApi = new SpotifyApi.Builder()
                 .setClientId(spClientId)
                 .setClientSecret(spClientSecret)
-                .setRedirectUri(SpotifyHttpManager.makeUri("https://angelolz.one"))
+                .setRedirectUri(SpotifyHttpManager.makeUri(redirectUrl))
                 .build();
 
             AuthorizationCodeCredentials authorizationCodeCredentials = getAuthCredentials();
@@ -43,8 +42,7 @@ public class DaylistSaver
 
         catch(Exception e)
         {
-            System.out.println("oopsies something went wrong");
-            e.printStackTrace();
+            System.out.println("Error occurred: " + e.getMessage());
         }
     }
 

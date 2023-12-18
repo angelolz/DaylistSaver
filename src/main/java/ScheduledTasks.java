@@ -97,14 +97,10 @@ public class ScheduledTasks
     {
         SpotifyApi api = DaylistSaver.getSpotifyApi();
         List<String> trackUris = getTrackUrisFromPlaylist(playlistSimpllified.getId());
-        String playlistName = playlistSimpllified.getName();
-        String[] nameSplit = playlistName.split("\\s+");
-        String timeOfDay = nameSplit[nameSplit.length - 1];
-        String newPlaylistName = String.format("%s %s | %s", getCurrentDateString(), timeOfDay,
-            playlistName.substring(playlistName.indexOf("•") + 1, playlistName.indexOf(timeOfDay)).trim());
+        String newPlaylistName = getNewPlaylistName(playlistSimpllified.getName());
 
         Playlist playlist = api.getPlaylist(playlistSimpllified.getId()).build().execute();
-        String userId = api.getCurrentUsersProfile().build().execute().getUri().split(":")[2];
+        String userId = api.getCurrentUsersProfile().build().execute().getUri().split(":")[2]; //spotify:user:userIdhere
         Playlist newPlaylist = api.createPlaylist(userId, newPlaylistName).public_(false).description(removeLinks(playlist.getDescription())).build().execute();
 
         api.addItemsToPlaylist(newPlaylist.getId(), trackUris.toArray(String[]::new)).build().execute();
@@ -130,6 +126,15 @@ public class ScheduledTasks
         }
 
         return trackUris;
+    }
+
+    private static String getNewPlaylistName(String playlistName)
+    {
+        String[] nameSplit = playlistName.split("\\s+");
+        String timeOfDay = nameSplit[nameSplit.length - 1];
+
+        return String.format("%s %s | %s", getCurrentDateString(), timeOfDay,
+            playlistName.substring(playlistName.indexOf("•") + 1, playlistName.indexOf(timeOfDay)).trim());
     }
 
     private static String getCurrentDateString()
