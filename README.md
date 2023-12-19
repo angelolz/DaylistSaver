@@ -1,4 +1,4 @@
-# DaylistSaver
+# objs.main.DaylistSaver
 
 This app automatically looks for a new update to your [daylist](https://newsroom.spotify.com/2023-09-12/ever-changing-playlist-daylist-music-for-all-day/), and create a new playlist for them so you never lose it.
 

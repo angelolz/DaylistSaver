@@ -1,3 +1,5 @@
+package main;
+
 import org.apache.hc.core5.http.ParseException;
 import se.michaelthelin.spotify.SpotifyApi;
 import se.michaelthelin.spotify.exceptions.SpotifyWebApiException;
@@ -6,10 +8,6 @@ import se.michaelthelin.spotify.model_objects.specification.*;
 import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeRefreshRequest;
 
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
@@ -51,7 +49,7 @@ public class ScheduledTasks
             PlaylistSimplified daylist = findDaylist();
 
             if(daylist != null)
-                makeNewPlaylist(daylist);
+                PlaylistManager.process(daylist);
         }
 
         catch(Exception e)
@@ -90,64 +88,5 @@ public class ScheduledTasks
 
         System.out.println("Couldn't find daylist.");
         return null;
-    }
-
-    private static void makeNewPlaylist(PlaylistSimplified playlistSimpllified) throws IOException, ParseException,
-        SpotifyWebApiException
-    {
-        SpotifyApi api = DaylistSaver.getSpotifyApi();
-        List<String> trackUris = getTrackUrisFromPlaylist(playlistSimpllified.getId());
-        String newPlaylistName = getNewPlaylistName(playlistSimpllified.getName());
-
-        Playlist playlist = api.getPlaylist(playlistSimpllified.getId()).build().execute();
-        String userId = api.getCurrentUsersProfile().build().execute().getUri().split(":")[2]; //spotify:user:userIdhere
-        Playlist newPlaylist = api.createPlaylist(userId, newPlaylistName).public_(false).description(removeLinks(playlist.getDescription())).build().execute();
-
-        api.addItemsToPlaylist(newPlaylist.getId(), trackUris.toArray(String[]::new)).build().execute();
-        System.out.println("Finished creating new playlist: " + newPlaylistName);
-    }
-
-    private static List<String> getTrackUrisFromPlaylist(String playlistId) throws IOException, ParseException,
-        SpotifyWebApiException
-    {
-        SpotifyApi api = DaylistSaver.getSpotifyApi();
-        List<String> trackUris = new ArrayList<>();
-        int offset = 0;
-        boolean finished = false;
-        while(!finished)
-        {
-            Paging<PlaylistTrack> daylistTracks = api.getPlaylistsItems(playlistId).limit(50).offset(offset).build().execute();
-            for(PlaylistTrack track : daylistTracks.getItems())
-                trackUris.add(track.getTrack().getUri());
-
-            offset += 50;
-            if(daylistTracks.getNext() == null)
-                finished = true;
-        }
-
-        return trackUris;
-    }
-
-    private static String getNewPlaylistName(String playlistName)
-    {
-        String[] nameSplit = playlistName.split("\\s+");
-        String timeOfDay = nameSplit[nameSplit.length - 1];
-
-        return String.format("%s %s | %s", getCurrentDateString(), timeOfDay,
-            playlistName.substring(playlistName.indexOf("•") + 1, playlistName.indexOf(timeOfDay)).trim());
-    }
-
-    private static String getCurrentDateString()
-    {
-        LocalDate currentDate = LocalDate.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yy");
-
-        return currentDate.format(formatter);
-    }
-
-    private static String removeLinks(String description)
-    {
-        String regex = "<a\\s*(?:[^>]*\\s+)?href=(\"[^\"]*\"|'[^']*')[^>]*>(.*?)</a>";
-        return description.replaceAll(regex, "$2");
     }
 }

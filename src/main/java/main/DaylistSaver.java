@@ -1,9 +1,12 @@
+package main;
+
 import org.apache.hc.core5.http.ParseException;
 import se.michaelthelin.spotify.SpotifyApi;
 import se.michaelthelin.spotify.SpotifyHttpManager;
 import se.michaelthelin.spotify.exceptions.SpotifyWebApiException;
 import se.michaelthelin.spotify.exceptions.detailed.BadRequestException;
 import se.michaelthelin.spotify.model_objects.credentials.AuthorizationCodeCredentials;
+import webserver.MainServer;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -14,6 +17,7 @@ import java.util.Scanner;
 public class DaylistSaver
 {
     private static SpotifyApi spotifyApi;
+    private static Config config;
 
     public static void main(String[] args)
     {
@@ -21,15 +25,12 @@ public class DaylistSaver
         {
             Properties prop = new Properties();
             prop.load(propFile);
-
-            String spClientId = prop.getProperty("spotify_client_id");
-            String spClientSecret = prop.getProperty("spotify_client_secret");
-            String redirectUrl = prop.getProperty("redirect_url");
+            config = new Config(prop);
 
             spotifyApi = new SpotifyApi.Builder()
-                .setClientId(spClientId)
-                .setClientSecret(spClientSecret)
-                .setRedirectUri(SpotifyHttpManager.makeUri(redirectUrl))
+                .setClientId(config.getSpotifyClientId())
+                .setClientSecret(config.getSpotifyClientSecret())
+                .setRedirectUri(SpotifyHttpManager.makeUri(config.getRedirectUrl()))
                 .build();
 
             AuthorizationCodeCredentials authorizationCodeCredentials = getAuthCredentials();
@@ -38,15 +39,19 @@ public class DaylistSaver
             System.out.println("Set access/refresh token.");
 
             ScheduledTasks.init();
+            MainServer.start(config.getPort());
         }
 
         catch(Exception e)
         {
             System.out.println("Error occurred: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
     public static SpotifyApi getSpotifyApi() { return spotifyApi; }
+
+    public static Config getConfig() { return config; }
 
     private static AuthorizationCodeCredentials getAuthCredentials() throws IOException, ParseException,
         SpotifyWebApiException
