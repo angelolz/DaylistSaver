@@ -44,7 +44,7 @@ public class DaylistSaver
 
         catch(Exception e)
         {
-            System.out.println("Error occurred: " + e.getMessage());
+            System.out.println("DaylistSaver Error occurred: " + e.getMessage());
             e.printStackTrace();
         }
     }

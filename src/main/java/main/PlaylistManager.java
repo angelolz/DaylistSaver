@@ -106,10 +106,11 @@ public class PlaylistManager
         List<String> trackUris = getTrackUrisFromPlaylist(playlistObject.getId());
 
         String userId = api.getCurrentUsersProfile().build().execute().getUri().split(":")[2]; //spotify:user:userIdhere
-        Playlist newPlaylist = api.createPlaylist(userId, playlistObject.getPlaylistName()).public_(false).description(playlistObject.getDescription()).build().execute();
+        String playlistName = String.format("%s %s | %s", playlistObject.getDate(), playlistObject.getTimeOfDay(), playlistObject.getGenres());
+        Playlist newPlaylist = api.createPlaylist(userId, playlistName).public_(false).description(playlistObject.getDescription()).build().execute();
 
         api.addItemsToPlaylist(newPlaylist.getId(), trackUris.toArray(String[]::new)).build().execute();
-        System.out.println("Finished creating new playlist: " + playlistObject.getPlaylistName());
+        System.out.println("Finished creating new playlist: " + playlistName);
     }
 
     private static List<String> getTrackUrisFromPlaylist(String playlistId) throws IOException, ParseException,

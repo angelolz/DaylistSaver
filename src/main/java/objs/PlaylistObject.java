@@ -7,7 +7,6 @@ public class PlaylistObject
     public String timeOfDay;
     public String genres;
     public String description;
-    public String name;
 
     public PlaylistObject(String id, String date, String timeOfDay, String genres, String description)
     {
@@ -16,7 +15,6 @@ public class PlaylistObject
         this.timeOfDay = timeOfDay;
         this.genres = genres;
         this.description = description;
-        this.name = getPlaylistName();
     }
 
     public String getId()
@@ -42,9 +40,5 @@ public class PlaylistObject
     public String getDescription()
     {
         return description;
-    }
-
-    public String getPlaylistName() {
-        return String.format("%s %s | %s", date, timeOfDay, genres);
     }
 }

@@ -10,7 +10,8 @@ public class Config
     private final String port;
     private final boolean savePlaylists;
 
-    public Config(Properties prop) {
+    public Config(Properties prop)
+    {
         this.spotifyClientId = prop.getProperty("spotify_client_id");
         this.spotifyClientSecret = prop.getProperty("spotify_client_secret");
         this.redirectUrl = prop.getProperty("redirect_url");

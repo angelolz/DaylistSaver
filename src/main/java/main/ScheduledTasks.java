@@ -21,6 +21,8 @@ public class ScheduledTasks
         System.out.println("Initializing tasks...");
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(ScheduledTasks::refreshToken, 1, 1, TimeUnit.HOURS);
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(ScheduledTasks::checkUpdatedPlaylist, 5, 10, TimeUnit.SECONDS);
+        System.out.println("Initialized tasks.");
+
     }
 
     private static void refreshToken()
