@@ -8,20 +8,25 @@ This project is still a WIP, as I have to put a couple more features to feel com
 
 # Dependencies
 - [spotify-web-api-java](https://github.com/spotify-web-api-java/spotify-web-api-java)
+- [jetty](https://github.com/jetty/jetty.project)
+- [gson](https://github.com/google/gson)
+- [pug4j](https://github.com/neuland/pug4j)
+- [logback](https://github.com/qos-ch/logback)
+- [slf4j](https://github.com/qos-ch/slf4j)
 
 # Building / Running
 1) Clone this repo. Create a new file called `config.properties`.
-    - Run executables will be created soon.
-2) Make a new app [here](https://developer.spotify.com/dashboard). Fill in the app name, description, redirect url, and check the "Web API" checkbox.
+   - Run executables will be created soon.
+2) Make a new app [here](https://developer.spotify.com/dashboard). Fill in the app name and description to whatever you want and check the "Web API" checkbox.
+   - Set the Redirect URL to "http://localhost:4050/callback"
 3) Inside `config.properties`, put these fields in:
    ```properties
    spotify_client_id=
    spotify_client_secret=
-   redirect_uri=
    ```
 4) Copy the client ID, client secret and redirect uri to their respective fields.
-5) Start the app. Upon startup, the app will ask for an authentication code. Visit the link shown. Once you've approved the request, you will see your authorization code in this format below:
-   ```
-   https://your-redirect-url.com?code=<your-auth-code-here>
-   ```
-6) The app will check for a new daylist update every hour.
+5) Start the app. Upon startup, the app will prompt you to visit `http://localhost:4050/login` to authenticate with your Spotify account.
+6) After authenticating, the app will start checking for daylist updates every hour.
+
+# License
+MIT
