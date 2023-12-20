@@ -45,7 +45,6 @@ public class PlaylistManager
         catch(Exception e)
         {
             DaylistSaver.getLogger().error("Error processing playlist.", e);
-            e.printStackTrace();
         }
     }
 
@@ -81,11 +80,12 @@ public class PlaylistManager
         try(FileWriter fw = new FileWriter("web/playlists.json"))
         {
             Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
+            String playlistName = Utils.getPlaylistName(newPlaylist);
             savedPlaylists.add(newPlaylist);
 
             String newJson = gson.toJson(savedPlaylists);
             fw.write(newJson);
-            DaylistSaver.getLogger().info("Saved new entry to playlist file: {}", Utils.getPlaylistName(newPlaylist));
+            DaylistSaver.getLogger().info("Saved new entry to playlist file: {}", playlistName);
         }
     }
 
@@ -103,13 +103,13 @@ public class PlaylistManager
     {
         SpotifyApi api = DaylistSaver.getSpotifyApi();
         List<String> trackUris = getTrackUrisFromPlaylist(daylist.getId());
-
         String userId = api.getCurrentUsersProfile().build().execute().getUri().split(":")[2]; //spotify:user:userIdhere
-        Playlist newPlaylist = api.createPlaylist(userId, Utils.getPlaylistName(playlistObject)).public_(false).description(playlistObject.getDescription()).build().execute();
+        String playlistName = Utils.getPlaylistName(playlistObject);
+        Playlist newPlaylist = api.createPlaylist(userId, playlistName).public_(false).description(playlistObject.getDescription()).build().execute();
 
         api.addItemsToPlaylist(newPlaylist.getId(), trackUris.toArray(String[]::new)).build().execute();
         playlistObject.setPlaylistId(newPlaylist.getId());
-        DaylistSaver.getLogger().info("Finished creating new playlist: " + Utils.getPlaylistName(playlistObject));
+        DaylistSaver.getLogger().info("Finished creating new playlist: {}", playlistName);
     }
 
     private static List<String> getTrackUrisFromPlaylist(String playlistId) throws IOException, ParseException,
