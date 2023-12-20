@@ -24,27 +24,27 @@ import java.util.List;
 
 public class PlaylistManager
 {
-    public static void process(PlaylistSimplified playlistSimplified)
+    public static void process(PlaylistSimplified daylistSimplified)
     {
         try
         {
             List<PlaylistObject> savedPlaylists = getSavedPlaylists();
-            if(isSaved(savedPlaylists, playlistSimplified))
+            if(isSaved(savedPlaylists, daylistSimplified))
                 return;
 
             SpotifyApi api = DaylistSaver.getSpotifyApi();
-            Playlist playlist = api.getPlaylist(playlistSimplified.getId()).build().execute();
-            PlaylistObject playlistObject = makeNewPlaylistObject(playlistSimplified, playlist);
-
-            addPlaylistToFile(savedPlaylists, playlistObject);
+            Playlist playlist = api.getPlaylist(daylistSimplified.getId()).build().execute();
+            PlaylistObject playlistObject = makeNewPlaylistObject(daylistSimplified, playlist);
 
             if(DaylistSaver.getConfig().isSavePlaylists())
-                createNewPlaylist(playlistObject);
+                createNewPlaylist(daylistSimplified, playlistObject);
+
+            addPlaylistToFile(savedPlaylists, playlistObject);
         }
 
         catch(Exception e)
         {
-            System.out.println("Error processing playlist.");
+            DaylistSaver.getLogger().error("Error processing playlist.", e);
             e.printStackTrace();
         }
     }
@@ -72,9 +72,7 @@ public class PlaylistManager
 
     private static boolean isSaved(List<PlaylistObject> savedPlaylists, PlaylistSimplified newPlaylist)
     {
-        return savedPlaylists.stream().anyMatch(playlist -> playlist.getId().equals(newPlaylist.getId())
-            && newPlaylist.getName().contains(playlist.getGenres())
-        );
+        return savedPlaylists.stream().anyMatch(playlist -> playlist.getSnapshotId().equals(newPlaylist.getSnapshotId()));
     }
 
     private static void addPlaylistToFile(List<PlaylistObject> savedPlaylists, PlaylistObject newPlaylist) throws
@@ -82,11 +80,12 @@ public class PlaylistManager
     {
         try(FileWriter fw = new FileWriter("web/playlists.json"))
         {
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
             savedPlaylists.add(newPlaylist);
 
             String newJson = gson.toJson(savedPlaylists);
             fw.write(newJson);
+            DaylistSaver.getLogger().info("Saved new entry to playlist file: {}", Utils.getPlaylistName(newPlaylist));
         }
     }
 
@@ -96,21 +95,21 @@ public class PlaylistManager
         String[] nameSplit = playlistName.split("\\s+");
         String timeOfDay = nameSplit[nameSplit.length - 1];
         String genres = playlistName.substring(playlistName.indexOf("•") + 1, playlistName.indexOf(timeOfDay)).trim();
-        return new PlaylistObject(playlistSimplified.getId(), getCurrentDateString(), timeOfDay, genres, removeLinks(playlist.getDescription()));
+        return new PlaylistObject(playlistSimplified.getSnapshotId(), getCurrentDateString(), timeOfDay, genres, removeLinks(playlist.getDescription()));
     }
 
-    private static void createNewPlaylist(PlaylistObject playlistObject) throws IOException, ParseException,
+    private static void createNewPlaylist(PlaylistSimplified daylist, PlaylistObject playlistObject) throws IOException, ParseException,
         SpotifyWebApiException
     {
         SpotifyApi api = DaylistSaver.getSpotifyApi();
-        List<String> trackUris = getTrackUrisFromPlaylist(playlistObject.getId());
+        List<String> trackUris = getTrackUrisFromPlaylist(daylist.getId());
 
         String userId = api.getCurrentUsersProfile().build().execute().getUri().split(":")[2]; //spotify:user:userIdhere
-        String playlistName = String.format("%s %s | %s", playlistObject.getDate(), playlistObject.getTimeOfDay(), playlistObject.getGenres());
-        Playlist newPlaylist = api.createPlaylist(userId, playlistName).public_(false).description(playlistObject.getDescription()).build().execute();
+        Playlist newPlaylist = api.createPlaylist(userId, Utils.getPlaylistName(playlistObject)).public_(false).description(playlistObject.getDescription()).build().execute();
 
         api.addItemsToPlaylist(newPlaylist.getId(), trackUris.toArray(String[]::new)).build().execute();
-        System.out.println("Finished creating new playlist: " + playlistName);
+        playlistObject.setPlaylistId(newPlaylist.getId());
+        DaylistSaver.getLogger().info("Finished creating new playlist: " + Utils.getPlaylistName(playlistObject));
     }
 
     private static List<String> getTrackUrisFromPlaylist(String playlistId) throws IOException, ParseException,

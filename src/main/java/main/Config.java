@@ -14,7 +14,7 @@ public class Config
     {
         this.spotifyClientId = prop.getProperty("spotify_client_id");
         this.spotifyClientSecret = prop.getProperty("spotify_client_secret");
-        this.redirectUrl = prop.getProperty("redirect_url");
+        this.redirectUrl = prop.getProperty("redirect_url", "http://localhost:4050/callback");
         this.port = prop.getProperty("port", "4050");
         this.savePlaylists = Boolean.parseBoolean(prop.getProperty("save_playlists", "false"));
     }

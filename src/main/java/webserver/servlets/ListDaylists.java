@@ -15,10 +15,10 @@ import java.util.Map;
 public class ListDaylists extends HttpServlet
 {
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException
     {
-        res.setContentType("text/html");
-        res.setStatus(HttpServletResponse.SC_OK);
+        resp.setContentType("text/html");
+        resp.setStatus(HttpServletResponse.SC_OK);
 
         PugConfiguration config = new PugConfiguration();
         config.setCaching(false);
@@ -27,6 +27,6 @@ public class ListDaylists extends HttpServlet
         Map<String, Object> model = new HashMap<>();
         model.put("playlists", PlaylistManager.getSavedPlaylists());
         String html = config.renderTemplate(template, model);
-        res.getWriter().println(html);
+        resp.getWriter().println(html);
     }
 }

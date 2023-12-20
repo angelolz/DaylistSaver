@@ -2,7 +2,8 @@ package objs;
 
 public class PlaylistObject
 {
-    public String id;
+    public String snapshotId;
+    public String playlistId;
     public String date;
     public String timeOfDay;
     public String genres;
@@ -10,16 +11,17 @@ public class PlaylistObject
 
     public PlaylistObject(String id, String date, String timeOfDay, String genres, String description)
     {
-        this.id = id;
+        this.snapshotId = id;
         this.date = date;
         this.timeOfDay = timeOfDay;
         this.genres = genres;
         this.description = description;
+        this.playlistId = null;
     }
 
-    public String getId()
+    public String getSnapshotId()
     {
-        return id;
+        return snapshotId;
     }
 
     public String getDate()
@@ -41,4 +43,8 @@ public class PlaylistObject
     {
         return description;
     }
+
+    public String getPlaylistId() { return playlistId; }
+
+    public void setPlaylistId(String playlistId) { this.playlistId = playlistId; }
 }

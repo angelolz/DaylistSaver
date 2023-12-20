@@ -18,11 +18,9 @@ public class ScheduledTasks
 
     public static void init()
     {
-        System.out.println("Initializing tasks...");
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(ScheduledTasks::refreshToken, 1, 1, TimeUnit.HOURS);
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(ScheduledTasks::checkUpdatedPlaylist, 5, 10, TimeUnit.SECONDS);
-        System.out.println("Initialized tasks.");
-
+        DaylistSaver.getLogger().info("Initialized tasks.");
     }
 
     private static void refreshToken()
@@ -32,20 +30,29 @@ public class ScheduledTasks
             SpotifyApi api = DaylistSaver.getSpotifyApi();
             if(!api.getAccessToken().isEmpty())
             {
+                api.setAccessToken(null);
+                api.setRefreshToken(null);
+
                 AuthorizationCodeRefreshRequest authorizationCodeRefreshRequest = api.authorizationCodeRefresh().build();
                 AuthorizationCodeCredentials authorizationCodeCredentials = authorizationCodeRefreshRequest.execute();
                 api.setAccessToken(authorizationCodeCredentials.getAccessToken());
+                api.setRefreshToken(authorizationCodeCredentials.getRefreshToken());
             }
         }
 
         catch(Exception e)
         {
-            System.out.println("Failed to get new token: " + e.getMessage());
+            DaylistSaver.getLogger().error("Failed to get new token: " + e.getMessage());
         }
     }
 
     public static void checkUpdatedPlaylist()
     {
+        SpotifyApi api = DaylistSaver.getSpotifyApi();
+
+        if(api.getAccessToken() == null || api.getRefreshToken() == null)
+            return;
+
         try
         {
             PlaylistSimplified daylist = findDaylist();
@@ -56,7 +63,7 @@ public class ScheduledTasks
 
         catch(Exception e)
         {
-            System.out.println("Unable to get updated daylist: " + e.getMessage());
+            DaylistSaver.getLogger().error("Unable to get updated daylist: " + e.getMessage());
         }
     }
 
@@ -88,7 +95,7 @@ public class ScheduledTasks
             offset += ITEM_LIMIT;
         }
 
-        System.out.println("Couldn't find daylist.");
+        DaylistSaver.getLogger().warn("Couldn't find daylist.");
         return null;
     }
 }
