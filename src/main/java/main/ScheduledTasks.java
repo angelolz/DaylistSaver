@@ -15,12 +15,17 @@ public class ScheduledTasks
 {
     private static final int ITEM_LIMIT = 50;
     private static String lastPlaylistId;
+    private static boolean initialized = false;
 
     public static void init()
     {
-        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(ScheduledTasks::refreshToken, 1, 1, TimeUnit.HOURS);
-        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(ScheduledTasks::checkUpdatedPlaylist, 5, 10, TimeUnit.SECONDS);
-        DaylistSaver.getLogger().info("Initialized tasks.");
+        if(!initialized)
+        {
+            initialized = true;
+            Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(ScheduledTasks::refreshToken, 1, 1, TimeUnit.HOURS);
+            Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(ScheduledTasks::checkUpdatedPlaylist, 5, 3600, TimeUnit.SECONDS);
+            DaylistSaver.getLogger().info("Initialized tasks.");
+        }
     }
 
     private static void refreshToken()
@@ -42,7 +47,7 @@ public class ScheduledTasks
 
         catch(Exception e)
         {
-            DaylistSaver.getLogger().error("Failed to get new token: " + e.getMessage());
+            DaylistSaver.getLogger().error("Failed to get new token.", e);
         }
     }
 
@@ -63,7 +68,7 @@ public class ScheduledTasks
 
         catch(Exception e)
         {
-            DaylistSaver.getLogger().error("Unable to get updated daylist: " + e.getMessage());
+            DaylistSaver.getLogger().error("Unable to get updated daylist.", e);
         }
     }
 

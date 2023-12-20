@@ -23,7 +23,9 @@ public class MainServer
             server.setHandler(servletHandler);
             server.start();
 
-            DaylistSaver.getLogger().info("DaylistSaver webserver started. Please authorize with Spotify here: http://localhost:4050/login");
+            if(!DaylistSaver.getConfig().isAskForCode())
+                DaylistSaver.getLogger().info("DaylistSaver webserver started. Please authorize with Spotify here: http://localhost:4050/login");
+
             server.join();
         }
 

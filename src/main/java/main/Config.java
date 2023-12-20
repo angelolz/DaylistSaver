@@ -9,6 +9,7 @@ public class Config
     private final String redirectUrl;
     private final String port;
     private final boolean savePlaylists;
+    private final boolean askForCode;
 
     public Config(Properties prop)
     {
@@ -17,6 +18,7 @@ public class Config
         this.redirectUrl = prop.getProperty("redirect_url", "http://localhost:4050/callback");
         this.port = prop.getProperty("port", "4050");
         this.savePlaylists = Boolean.parseBoolean(prop.getProperty("save_playlists", "false"));
+        this.askForCode = Boolean.parseBoolean(prop.getProperty("ask_for_code", "false"));
     }
 
     public String getSpotifyClientId()
@@ -43,4 +45,6 @@ public class Config
     {
         return savePlaylists;
     }
+
+    public boolean isAskForCode() { return askForCode; }
 }
