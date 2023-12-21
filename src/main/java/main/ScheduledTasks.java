@@ -22,8 +22,8 @@ public class ScheduledTasks
         if(!initialized)
         {
             initialized = true;
-            Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(ScheduledTasks::refreshToken, 1, 1, TimeUnit.HOURS);
-            Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(ScheduledTasks::checkUpdatedPlaylist, 5, 3600, TimeUnit.SECONDS);
+            Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(ScheduledTasks::refreshToken, 50, 50, TimeUnit.MINUTES);
+            Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(ScheduledTasks::checkUpdatedPlaylist, 10, 3600, TimeUnit.SECONDS);
             DaylistSaver.getLogger().info("Initialized tasks.");
         }
     }
@@ -35,13 +35,13 @@ public class ScheduledTasks
             SpotifyApi api = DaylistSaver.getSpotifyApi();
             if(!api.getAccessToken().isEmpty())
             {
-                api.setAccessToken(null);
-                api.setRefreshToken(null);
+                AuthorizationCodeRefreshRequest authorizationCodeRefreshRequest = api.authorizationCodeRefresh()
+                    .grant_type("refresh_token").refresh_token(api.getRefreshToken()).build();
 
-                AuthorizationCodeRefreshRequest authorizationCodeRefreshRequest = api.authorizationCodeRefresh().build();
                 AuthorizationCodeCredentials authorizationCodeCredentials = authorizationCodeRefreshRequest.execute();
                 api.setAccessToken(authorizationCodeCredentials.getAccessToken());
-                api.setRefreshToken(authorizationCodeCredentials.getRefreshToken());
+
+                DaylistSaver.getLogger().info("Refreshed authorization token.");
             }
         }
 

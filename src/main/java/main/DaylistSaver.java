@@ -34,7 +34,7 @@ public class DaylistSaver
             spotifyApi = new SpotifyApi.Builder()
                 .setClientId(config.getSpotifyClientId())
                 .setClientSecret(config.getSpotifyClientSecret())
-                .setRedirectUri(SpotifyHttpManager.makeUri(config.isAskForCode() ? "https://angelolz.one" : config.getRedirectUrl()))
+                .setRedirectUri(SpotifyHttpManager.makeUri(config.isAskForCode() ? config.getRedirectUrl() : String.format("http://localhost:%d/callback", config.getPort())))
                 .build();
 
             if(config.isAskForCode())
@@ -46,7 +46,7 @@ public class DaylistSaver
             }
 
             logger.info("Started listening on port {}", config.getPort());
-            MainServer.start(config.getPort());
+            MainServer.start(String.valueOf(config.getPort()));
         }
 
         catch(Exception e)
@@ -64,7 +64,6 @@ public class DaylistSaver
     private static AuthorizationCodeCredentials retrieveAuth() throws IOException, ParseException,
         SpotifyWebApiException
     {
-        //todo put this stuff in readme
         URI uri = DaylistSaver.getSpotifyApi().authorizationCodeUri().scope(AuthorizationScope.PLAYLIST_READ_PRIVATE,
             AuthorizationScope.PLAYLIST_MODIFY_PRIVATE, AuthorizationScope.PLAYLIST_READ_COLLABORATIVE).build().execute();
 

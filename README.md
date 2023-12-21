@@ -28,5 +28,17 @@ This project is still a WIP, as I have to put a couple more features to feel com
 5) Start the app. Upon startup, the app will prompt you to visit `http://localhost:4050/login` to authenticate with your Spotify account.
 6) After authenticating, the app will start checking for daylist updates every hour.
 
+### Extra configuration settings
+There are extra settings you can set described below, if not set then they will be set to default values:
+- `port` - sets the port where the webserver will run on. This port will be used on the `redirect_url`'s default value as well. Must be a **number**.
+  - default: `4050`
+- `save_playlists` - A `true`/`false` value that toggles whether to create a new Spotify playlist automatically when your daylists updates.
+  - default: `false`
+- `ask_for_code` - This setting toggles whether it asks for your authorization code on startup. This does not disable the `/login` endpoint.
+  - default: `false`
+- `redirect_url` - Changes the redirect url after authenticating with your spotify. **Used when `ask_for_code` is `true`**.
+  - When changing this, make sure you put the redirect url in your app settings on your developer dashboard, or else it will not work.
+  - default: `http://localhost:{port}/callback`
+
 # License
 MIT
