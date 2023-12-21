@@ -4,7 +4,7 @@ This app automatically looks for a new update to your [daylist](https://newsroom
 
 The daylist creates a new playlist with a different playlist ID on update, which means that unless you have the link of the playlist before it is updated, there's no way for you to get the old (as far as I know).
 
-This project is still a WIP, as I have to put a couple more features to feel complete, such as a better callback page where you can easily copy your authorization token, save the playlist link instead of making a whole new playlist instead, etc.
+This project is still a WIP, as I have to put a couple more features to feel complete.
 
 # Dependencies
 - [spotify-web-api-java](https://github.com/spotify-web-api-java/spotify-web-api-java)
