@@ -4,9 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import objs.PlaylistObject;
-import org.apache.hc.core5.http.ParseException;
 import se.michaelthelin.spotify.SpotifyApi;
-import se.michaelthelin.spotify.exceptions.SpotifyWebApiException;
 import se.michaelthelin.spotify.model_objects.specification.Paging;
 import se.michaelthelin.spotify.model_objects.specification.Playlist;
 import se.michaelthelin.spotify.model_objects.specification.PlaylistSimplified;
@@ -17,8 +15,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,7 +33,7 @@ public class PlaylistManager
             PlaylistObject playlistObject = makeNewPlaylistObject(daylistSimplified, playlist);
 
             if(DaylistSaver.getConfig().isSavePlaylists())
-                createNewPlaylist(daylistSimplified, playlistObject);
+                createNewPlaylist(playlistObject);
 
             addPlaylistToFile(savedPlaylists, playlistObject);
         }
@@ -63,9 +59,7 @@ public class PlaylistManager
         else
         {
             String playlistJson = new String(Files.readAllBytes(Paths.get("web/playlists.json")));
-            return new Gson().fromJson(playlistJson, new TypeToken<List<PlaylistObject>>()
-            {
-            }.getType());
+            return new Gson().fromJson(playlistJson, new TypeToken<List<PlaylistObject>>(){}.getType());
         }
     }
 
@@ -74,14 +68,14 @@ public class PlaylistManager
         return savedPlaylists.stream().anyMatch(playlist -> playlist.getSnapshotId().equals(newPlaylist.getSnapshotId()));
     }
 
-    private static void addPlaylistToFile(List<PlaylistObject> savedPlaylists, PlaylistObject newPlaylist) throws
+    private static void addPlaylistToFile(List<PlaylistObject> savedPlaylists, PlaylistObject newPlaylistObject) throws
         IOException
     {
         try(FileWriter fw = new FileWriter("web/playlists.json"))
         {
             Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
-            String playlistName = Utils.getPlaylistName(newPlaylist);
-            savedPlaylists.add(newPlaylist);
+            String playlistName = Utils.getPlaylistName(newPlaylistObject);
+            savedPlaylists.add(newPlaylistObject);
 
             String newJson = gson.toJson(savedPlaylists);
             fw.write(newJson);
@@ -89,31 +83,35 @@ public class PlaylistManager
         }
     }
 
-    private static PlaylistObject makeNewPlaylistObject(PlaylistSimplified playlistSimplified, Playlist playlist)
+    private static PlaylistObject makeNewPlaylistObject(PlaylistSimplified playlistSimplified, Playlist playlist) throws
+        Exception
     {
-        String playlistName = playlistSimplified.getName();
-        String[] nameSplit = playlistName.split("\\s+");
-        String timeOfDay = nameSplit[nameSplit.length - 1];
-        String genres = playlistName.substring(playlistName.indexOf("•") + 1, playlistName.indexOf(timeOfDay)).trim();
-        return new PlaylistObject(playlistSimplified.getSnapshotId(), Utils.getCurrentDate(), timeOfDay, genres, removeLinks(playlist.getDescription()));
+        PlaylistObject playlistObject = new PlaylistObject()
+            .setSnapshotId(playlistSimplified.getSnapshotId())
+            .setDate(Utils.getCurrentDate())
+            .setDescription(removeLinks(playlist.getDescription()))
+            .setTimeOfDay(getTimeOfDay(playlistSimplified.getName()))
+            .setGenres(getGenres(playlistSimplified.getName()));
+
+        List<String> trackIds = getTrackUrisFromPlaylist(playlist.getId());
+        playlistObject.setTrackIds(trackIds);
+
+        return playlistObject;
     }
 
-    private static void createNewPlaylist(PlaylistSimplified daylist, PlaylistObject playlistObject) throws IOException, ParseException,
-        SpotifyWebApiException
+    private static void createNewPlaylist(PlaylistObject playlistObject) throws Exception
     {
         SpotifyApi api = DaylistSaver.getSpotifyApi();
-        List<String> trackUris = getTrackUrisFromPlaylist(daylist.getId());
         String userId = api.getCurrentUsersProfile().build().execute().getUri().split(":")[2]; //spotify:user:userIdhere
         String playlistName = Utils.getPlaylistName(playlistObject);
         Playlist newPlaylist = api.createPlaylist(userId, playlistName).public_(false).description(playlistObject.getDescription()).build().execute();
 
-        api.addItemsToPlaylist(newPlaylist.getId(), trackUris.toArray(String[]::new)).build().execute();
+        api.addItemsToPlaylist(newPlaylist.getId(), playlistObject.getTrackIds().toArray(String[]::new)).build().execute();
         playlistObject.setPlaylistId(newPlaylist.getId());
         DaylistSaver.getLogger().info("Finished creating new playlist: {}", playlistName);
     }
 
-    private static List<String> getTrackUrisFromPlaylist(String playlistId) throws IOException, ParseException,
-        SpotifyWebApiException
+    private static List<String> getTrackUrisFromPlaylist(String playlistId) throws Exception
     {
         SpotifyApi api = DaylistSaver.getSpotifyApi();
         List<String> trackUris = new ArrayList<>();
@@ -137,5 +135,27 @@ public class PlaylistManager
     {
         String regex = "<a\\s*(?:[^>]*\\s+)?href=(\"[^\"]*\"|'[^']*')[^>]*>(.*?)</a>";
         return description.replaceAll(regex, "$2");
+    }
+
+    private static String getTimeOfDay(String playlistName)
+    {
+        String trimmedName = playlistName.substring(playlistName.indexOf("•") + 1).toLowerCase().trim();
+
+        if(trimmedName.endsWith("late night"))
+            return "late night";
+
+        String[] nameSplit = trimmedName.split("\\s+");
+        return nameSplit[nameSplit.length - 1];
+    }
+
+    private static String getGenres(String playlistName)
+    {
+        String trimmedName = playlistName.substring(playlistName.indexOf("•") + 1).toLowerCase().trim();
+
+        if(trimmedName.endsWith("late night"))
+            return trimmedName.substring(0, trimmedName.indexOf("late night"));
+
+        String[] nameSplit = trimmedName.split("\\s+");
+        return trimmedName.substring(0, trimmedName.indexOf(nameSplit[nameSplit.length - 1]));
     }
 }

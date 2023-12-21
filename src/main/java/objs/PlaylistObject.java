@@ -1,5 +1,7 @@
 package objs;
 
+import java.util.List;
+
 public class PlaylistObject
 {
     public String snapshotId;
@@ -8,20 +10,28 @@ public class PlaylistObject
     public String timeOfDay;
     public String genres;
     public String description;
-
-    public PlaylistObject(String id, String date, String timeOfDay, String genres, String description)
-    {
-        this.snapshotId = id;
-        this.date = date;
-        this.timeOfDay = timeOfDay;
-        this.genres = genres;
-        this.description = description;
-        this.playlistId = null;
-    }
+    public List<String> trackIds;
 
     public String getSnapshotId()
     {
         return snapshotId;
+    }
+
+    public PlaylistObject setSnapshotId(String snapshotId)
+    {
+        this.snapshotId = snapshotId;
+        return this;
+    }
+
+    public String getPlaylistId()
+    {
+        return playlistId;
+    }
+
+    public PlaylistObject setPlaylistId(String playlistId)
+    {
+        this.playlistId = playlistId;
+        return this;
     }
 
     public String getDate()
@@ -29,9 +39,21 @@ public class PlaylistObject
         return date;
     }
 
+    public PlaylistObject setDate(String date)
+    {
+        this.date = date;
+        return this;
+    }
+
     public String getTimeOfDay()
     {
         return timeOfDay;
+    }
+
+    public PlaylistObject setTimeOfDay(String timeOfDay)
+    {
+        this.timeOfDay = timeOfDay;
+        return this;
     }
 
     public String getGenres()
@@ -39,12 +61,31 @@ public class PlaylistObject
         return genres;
     }
 
+    public PlaylistObject setGenres(String genres)
+    {
+        this.genres = genres;
+        return this;
+    }
+
     public String getDescription()
     {
         return description;
     }
 
-    public String getPlaylistId() { return playlistId; }
+    public PlaylistObject setDescription(String description)
+    {
+        this.description = description;
+        return this;
+    }
 
-    public void setPlaylistId(String playlistId) { this.playlistId = playlistId; }
+    public List<String> getTrackIds()
+    {
+        return trackIds;
+    }
+
+    public PlaylistObject setTrackIds(List<String> trackIds)
+    {
+        this.trackIds = trackIds;
+        return this;
+    }
 }
