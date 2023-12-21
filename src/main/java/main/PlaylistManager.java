@@ -153,9 +153,9 @@ public class PlaylistManager
         String trimmedName = playlistName.substring(playlistName.indexOf("•") + 1).toLowerCase().trim();
 
         if(trimmedName.endsWith("late night"))
-            return trimmedName.substring(0, trimmedName.indexOf("late night"));
+            return trimmedName.substring(0, trimmedName.indexOf("late night")).trim();
 
         String[] nameSplit = trimmedName.split("\\s+");
-        return trimmedName.substring(0, trimmedName.indexOf(nameSplit[nameSplit.length - 1]));
+        return trimmedName.substring(0, trimmedName.indexOf(nameSplit[nameSplit.length - 1])).trim();
     }
 }
