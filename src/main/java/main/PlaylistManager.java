@@ -95,7 +95,7 @@ public class PlaylistManager
         String[] nameSplit = playlistName.split("\\s+");
         String timeOfDay = nameSplit[nameSplit.length - 1];
         String genres = playlistName.substring(playlistName.indexOf("•") + 1, playlistName.indexOf(timeOfDay)).trim();
-        return new PlaylistObject(playlistSimplified.getSnapshotId(), getCurrentDateString(), timeOfDay, genres, removeLinks(playlist.getDescription()));
+        return new PlaylistObject(playlistSimplified.getSnapshotId(), Utils.getCurrentDate(), timeOfDay, genres, removeLinks(playlist.getDescription()));
     }
 
     private static void createNewPlaylist(PlaylistSimplified daylist, PlaylistObject playlistObject) throws IOException, ParseException,
@@ -131,14 +131,6 @@ public class PlaylistManager
         }
 
         return trackUris;
-    }
-
-    private static String getCurrentDateString()
-    {
-        LocalDate currentDate = LocalDate.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yy");
-
-        return currentDate.format(formatter);
     }
 
     private static String removeLinks(String description)

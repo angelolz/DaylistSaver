@@ -35,10 +35,14 @@ There are extra settings you can set described below, if not set then they will 
 - `save_playlists` - A `true`/`false` value that toggles whether to create a new Spotify playlist automatically when your daylists updates.
   - default: `false`
 - `ask_for_code` - This setting toggles whether it asks for your authorization code on startup. This does not disable the `/login` endpoint.
+  - Useful for when you run this app on a server and don't want to use the webserver to login.
   - default: `false`
 - `redirect_url` - Changes the redirect url after authenticating with your spotify. **Used when `ask_for_code` is `true`**.
   - When changing this, make sure you put the redirect url in your app settings on your developer dashboard, or else it will not work.
   - default: `http://localhost:{port}/callback`
+- `timezone` - determines what timezone to use when getting the current date to use for new playlist names.
+  - Valid timezones can be found [here](https://garygregory.wordpress.com/2013/06/18/what-are-the-java-timezone-ids/).
+  - default: `null`, app will determine the timezone from current time on the machine it's running on.
 
 # License
 MIT
