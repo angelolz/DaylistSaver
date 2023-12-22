@@ -14,7 +14,6 @@ import java.util.concurrent.TimeUnit;
 public class ScheduledTasks
 {
     private static final int ITEM_LIMIT = 50;
-    private static String lastPlaylistId;
     private static boolean initialized = false;
 
     public static void init()
@@ -36,7 +35,7 @@ public class ScheduledTasks
             if(!api.getAccessToken().isEmpty())
             {
                 AuthorizationCodeRefreshRequest authorizationCodeRefreshRequest = api.authorizationCodeRefresh()
-                    .grant_type("refresh_token").refresh_token(api.getRefreshToken()).build();
+                                                                                     .grant_type("refresh_token").refresh_token(api.getRefreshToken()).build();
 
                 AuthorizationCodeCredentials authorizationCodeCredentials = authorizationCodeRefreshRequest.execute();
                 api.setAccessToken(authorizationCodeCredentials.getAccessToken());
@@ -85,16 +84,7 @@ public class ScheduledTasks
             for(PlaylistSimplified playlist : playlists)
             {
                 if(playlist.getName().startsWith("daylist • "))
-                {
-                    if(!playlist.getId().equals(lastPlaylistId))
-                    {
-                        lastPlaylistId = playlist.getId();
-                        return playlist;
-                    }
-
-                    else
-                        return null;
-                }
+                    return playlist;
             }
 
             offset += ITEM_LIMIT;
