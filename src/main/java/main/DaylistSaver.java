@@ -20,11 +20,14 @@ import java.util.Scanner;
 public class DaylistSaver
 {
     private static final Logger logger = LoggerFactory.getLogger(DaylistSaver.class);
+    private static final String version = "0.0.1";
     private static SpotifyApi spotifyApi;
     private static Config config;
 
     public static void main(String[] args)
     {
+        logger.info("DaylistSaver v{}", version);
+
         try(FileInputStream propFile = new FileInputStream("config.properties"))
         {
             Properties prop = new Properties();

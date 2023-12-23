@@ -59,7 +59,9 @@ public class PlaylistManager
         else
         {
             String playlistJson = new String(Files.readAllBytes(Paths.get("web/playlists.json")));
-            return new Gson().fromJson(playlistJson, new TypeToken<List<PlaylistObject>>(){}.getType());
+            return new Gson().fromJson(playlistJson, new TypeToken<List<PlaylistObject>>()
+            {
+            }.getType());
         }
     }
 
@@ -143,9 +145,13 @@ public class PlaylistManager
 
         if(trimmedName.endsWith("late night"))
             return "late night";
-
-        String[] nameSplit = trimmedName.split("\\s+");
-        return nameSplit[nameSplit.length - 1];
+        else if(trimmedName.endsWith("early morning"))
+            return "early morning";
+        else
+        {
+            String[] nameSplit = trimmedName.split("\\s+");
+            return nameSplit[nameSplit.length - 1];
+        }
     }
 
     private static String getGenres(String playlistName)
@@ -154,8 +160,12 @@ public class PlaylistManager
 
         if(trimmedName.endsWith("late night"))
             return trimmedName.substring(0, trimmedName.indexOf("late night")).trim();
-
-        String[] nameSplit = trimmedName.split("\\s+");
-        return trimmedName.substring(0, trimmedName.indexOf(nameSplit[nameSplit.length - 1])).trim();
+        else if(trimmedName.endsWith("early morning"))
+            return trimmedName.substring(0, trimmedName.indexOf("early morning")).trim();
+        else
+        {
+            String[] nameSplit = trimmedName.split("\\s+");
+            return trimmedName.substring(0, trimmedName.indexOf(nameSplit[nameSplit.length - 1])).trim();
+        }
     }
 }
